@@ -60,6 +60,45 @@ test('ensure post request to add blogs works', async () => {
 
 })
 
+test('deleting a blog', async () => {
+  const blogsToStart = await helper.blogsInDb()
+  const blogToDelete = blogsToStart[0]
+
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+
+  const blogsAtEnd = await helper.blogsInDb()
+
+  expect(blogsAtEnd).toHaveLength(
+    helper.initialBlogs.length - 1
+  )
+
+  const titles = blogsAtEnd.map(r => r.title)
+
+  expect(titles).not.toContain(blogsAtEnd.title)
+})
+
+test('deleting a blog', async () => {
+  const blogsBefore = await helper.blogsInDb()
+  const blogToUseBefore = blogsBefore[0]
+  updatedBlog = {
+    likes: 10
+  }
+
+  await api
+    .put(`/api/blogs/${blogToUseBefore.id}`)
+    .send(updatedBlog)
+    .expect(200)
+
+  const blogsAfter = await helper.blogsInDb()
+  const blogToUseAfter = blogsAfter[0]
+  
+  expect(blogToUseAfter.likes).toBe(10)
+  expect(blogToUseAfter.author).toBe(blogToUseBefore.author)
+
+})
+
 afterAll(async () => {
   await mongoose.connection.close()
 })
